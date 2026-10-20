@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DI PASAR - SDIT Muhammadiyah Al Kautsar</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- QRCodeJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; overflow: hidden;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #faf5ff 100%);
+            color: #0f172a;
+        }
+        .ambient-orb {
+            position: fixed; border-radius: 9999px; filter: blur(120px); z-index: 0; pointer-events: none;
+            animation: floatOrb 22s infinite alternate ease-in-out;
+        }
+        .orb-1 { top: -15%; left: -10%; width: 55vw; height: 55vw; background: rgba(186, 230, 253, 0.5); }
+        .orb-2 { bottom: -15%; right: -10%; width: 60vw; height: 60vw; background: rgba(221, 214, 254, 0.45); animation-delay: -6s; }
+        .orb-3 { top: 20%; right: 25%; width: 45vw; height: 45vw; background: rgba(254, 243, 199, 0.4); animation-delay: -11s; }
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 20px) scale(1.06); }
+        }
+
+        .macos-window {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(36px) saturate(160%);
+            -webkit-backdrop-filter: blur(36px) saturate(160%);
+            border: 1.5px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 24px 60px -15px rgba(30, 41, 59, 0.12), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
+        }
+        .app-header {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(28px) saturate(150%);
+            -webkit-backdrop-filter: blur(28px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04);
+            color: #0f172a;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(30px) saturate(160%);
+            -webkit-backdrop-filter: blur(30px) saturate(160%);
+            border: 1px solid #ffffff;
+            box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.06);
+            color: #0f172a;
+        }
+        .glass-button {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid #ffffff;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+            color: #334155;
+            font-weight: 700;
+        }
+        .glass-button:hover { background: #ffffff; color: #0f172a; }
+        .nav-item-active {
+            background: #ffffff;
+            color: #2563eb !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+            border: 1px solid #ffffff;
+            font-weight: 800;
+        }
+        .custom-dropdown-menu {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(36px) saturate(180%);
+            border: 1px solid #ffffff;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+            color: #0f172a;
+        }
+        .search-pill {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02) inset;
+        }
+
+        /* Category Cards unique tint & styling */
+        .card-elektronik {
+            background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(219, 234, 254, 0.90) 100%);
+            border: 1px solid rgba(191, 219, 254, 0.9);
+        }
+        .card-furnitur {
+            background: linear-gradient(135deg, rgba(254, 243, 199, 0.92) 0%, rgba(254, 235, 175, 0.88) 100%);
+            border: 1px solid rgba(253, 230, 138, 0.9);
+        }
+        .card-fasilitas {
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.92) 0%, rgba(209, 250, 229, 0.88) 100%);
+            border: 1px solid rgba(167, 243, 208, 0.9);
+        }
+
+        @keyframes floatAnim {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .anim-element { animation: floatAnim 4s ease-in-out infinite; }
+
+        @keyframes scan-line {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="h-screen w-full p-2 md:p-3 relative flex flex-col overflow-hidden select-none">
+
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <!-- Toast Notification -->
+    <div id="app-toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] pointer-events-none opacity-0 -translate-y-4 transition-all duration-300">
+        <div class="glass-card px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-white">
+            <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs shadow">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <span id="app-toast-msg" class="text-xs md:text-sm font-bold text-slate-900">Berhasil disimpan</span>
+        </div>
+    </div>
+
+    <div class="macos-window w-full h-full rounded-[26px] md:rounded-[30px] flex flex-col overflow-hidden relative z-10">
+
+        <!-- AlkaNews Supreme Header (Full Width, No Sidebar) -->
+        <header class="app-header px-5 md:px-8 py-3.5 h-16 flex items-center justify-between gap-4 shrink-0 z-40 w-full">
+            <div class="flex items-center gap-3.5">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-[#FF5F56] inline-block shadow-inner cursor-pointer" onclick="syncFromSupabase(true)" title="Sinkronkan Supabase"></span>
+                    <span class="w-3 h-3 rounded-full bg-[#FFBD2E] inline-block shadow-inner"></span>
+                    <span class="w-3 h-3 rounded-full bg-[#27C93F] inline-block shadow-inner"></span>
+                </div>
+                <div onclick="showDashboard()" class="flex items-center cursor-pointer select-none">
+                    <span class="text-base md:text-lg font-extrabold tracking-tight text-slate-900">DI<span class="text-blue-600">PASAR</span></span>
+                </div>
+            </div>
+
+            <!-- Top Navigation matching AlkaNews & Ref -->
+            <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                <button onclick="showDashboard()" id="top-nav-dashboard" class="top-nav-item nav-item-active px-4 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 shrink-0 transition-all">
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="showAsetView()" id="top-nav-aset" class="top-nav-item px-4 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 shrink-0 transition-all">
+                    <span>Inventaris Aset</span>
+                    <span id="badge-side-aset" class="bg-blue-50 text-blue-600 border border-blue-200 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full leading-tight">5</span>
+                </button>
+                <button onclick="showPeminjamanView()" id="top-nav-pinjam" class="top-nav-item px-4 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 shrink-0 transition-all">
+                    <span>Sirkulasi Pinjam</span>
+                    <span id="badge-side-pinjam" class="bg-amber-50 text-amber-600 border border-amber-200 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full leading-tight">2</span>
+                </button>
+                <button onclick="showMaintenanceView()" id="top-nav-maintenance" class="top-nav-item px-4 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 shrink-0 transition-all">
+                    <span>Perbaikan Sarpras</span>
+                    <span id="badge-side-maint" class="bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full leading-tight">2</span>
+                </button>
+                <button onclick="startScanner()" id="top-nav-scanner" class="top-nav-item px-4 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 shrink-0 transition-all">
+                    <span>Pindai QR</span>
+                </button>
+            </nav>
+
+            <div class="flex items-center gap-2.5 shrink-0">
+                <button onclick="openModalSupabase()" class="bg-white/90 hover:bg-white border border-white shadow-sm px-4 py-1.5 rounded-full flex items-center gap-2 text-xs font-bold text-slate-700 transition-all active:scale-95">
+                    <span id="supabase-dot-desktop" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="supabase-label-desktop">Supabase Cloud</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden relative">
+            <main class="flex-1 h-full overflow-y-auto no-scrollbar relative z-10 flex flex-col w-full px-6 md:px-12 py-6">
+
+                <!-- DASHBOARD VIEW -->
+                <div id="dashboard-view" style="display: block;" class="w-full pb-12 animate-[fadeIn_0.3s_ease-out] space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Sarpras Al Kautsar</h1>
+                            <p class="text-xs md:text-sm text-slate-500 font-medium mt-1">Pusat kendali inventaris aset, sirkulasi peminjaman, dan pemeliharaan fasilitas sekolah.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openModalTambah()" class="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Registrasi Aset Baru
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stat Overview Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div onclick="showAsetView()" class="glass-card rounded-[24px] p-5 cursor-pointer hover:scale-[1.01] transition-all flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider">Inventaris</span>
+                                <h3 id="stat-total-aset" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">5</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Total Aset Tercatat</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-md">
+                                <i class="fa-solid fa-boxes-stacked"></i>
+                            </div>
+                        </div>
+
+                        <div onclick="showPeminjamanView()" class="glass-card rounded-[24px] p-5 cursor-pointer hover:scale-[1.01] transition-all flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 uppercase tracking-wider">Sirkulasi</span>
+                                <h3 id="stat-total-pinjam" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">2</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Sedang Dipinjam</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-lg shadow-md">
+                                <i class="fa-solid fa-hand-holding-hand"></i>
+                            </div>
+                        </div>
+
+                        <div onclick="showMaintenanceView()" class="glass-card rounded-[24px] p-5 cursor-pointer hover:scale-[1.01] transition-all flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 uppercase tracking-wider">Perbaikan</span>
+                                <h3 id="stat-total-maint" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">2</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Dalam Pemeliharaan</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-lg shadow-md">
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                            </div>
+                        </div>
+
+                        <div onclick="showAsetView()" class="glass-card rounded-[24px] p-5 cursor-pointer hover:scale-[1.01] transition-all flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 uppercase tracking-wider">Kondisi</span>
+                                <h3 id="stat-persen-baik" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">80%</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">Tingkat Kesiapan Baik</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-md">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hero Banner -->
+                    <section class="glass-card rounded-[28px] p-6 md:p-8 w-full">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                            <div class="lg:col-span-7 rounded-2xl bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-6 md:p-8 text-white relative overflow-hidden min-h-[220px] flex flex-col justify-between shadow-inner">
+                                <div class="relative z-10 flex items-center justify-between">
+                                    <span class="px-3 py-1 rounded-full bg-white/95 text-blue-700 font-extrabold text-[10px] tracking-wider uppercase shadow-sm">PORTAL SARPRAS</span>
+                                    <span id="portal-user-name" class="text-xs font-semibold text-blue-200">Mas Ocid, S.Sarp.Ras.</span>
+                                </div>
+                                <div class="relative z-10 my-4">
+                                    <h2 class="text-xl md:text-2xl font-extrabold leading-snug text-white max-w-xl">
+                                        Integrasi Barcode & QR Code Pintar untuk Aset Sekolah
+                                    </h2>
+                                    <p class="text-xs text-blue-100/85 mt-2 max-w-lg leading-relaxed">
+                                        Sinkronisasi real-time dengan <strong class="text-white">Supabase Cloud</strong>. Cetak label stiker inventaris profesional untuk ditempel pada setiap peralatan sekolah.
+                                    </p>
+                                </div>
+                                <div class="absolute -right-10 -bottom-10 w-52 h-52 rounded-full bg-blue-500/20 blur-2xl pointer-events-none"></div>
+                            </div>
+
+                            <div class="lg:col-span-5 flex flex-col justify-center px-2">
+                                <span class="text-xs font-bold text-slate-400 mb-1.5" id="greeting-desktop">Laporan Terkini • SDIT Muh. Al Kautsar</span>
+                                <h3 class="text-xl md:text-2xl font-extrabold text-slate-900 leading-snug mb-2.5">
+                                    Pencetakan Kartu Label F4
+                                </h3>
+                                <p class="text-xs md:text-sm text-slate-500 leading-relaxed mb-6">
+                                    Cetak kartu label per item secara instan atau unduh semua label dalam 1 lembar F4 untuk efisiensi penempelan barang.
+                                </p>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <button onclick="showAsetView()" class="px-5 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all active:scale-95 flex items-center gap-2">
+                                        <span>Buka Katalog Aset</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </button>
+                                    <button onclick="openModalPinjam()" class="px-4 py-2.5 rounded-full glass-button text-xs font-bold transition-all active:scale-95">
+                                        + Pinjam Aset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Recent Assets Preview Table -->
+                    <section class="glass-card rounded-[28px] p-6 md:p-8 w-full">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-900">Daftar Aset & Status Terkini</h3>
+                            <button onclick="showAsetView()" class="text-xs font-bold text-blue-600 hover:underline">Lihat Semua Aset →</button>
+                        </div>
+                        <div id="dashboard-recent-list" class="space-y-3"></div>
+                    </section>
+                </div>
+
+                <!-- ASET VIEW -->
+                <div id="aset-view" style="display: none;" class="w-full pb-12 animate-[fadeIn_0.3s_ease-out] space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Inventaris Aset Sekolah</h2>
+                            <p class="text-slate-500 font-medium text-xs md:text-sm mt-1">Kelompok kategori lengkap dengan cetak label QR & Barcode resmi</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="downloadAllBarcodePDF()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs md:text-sm font-bold shadow-md transition-all active:scale-95 flex items-center gap-2">
+                                <i class="fa-solid fa-file-pdf"></i> Download Semua (Sheet F4)
+                            </button>
+                            <button onclick="openModalTambah()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs md:text-sm font-bold shadow-md shadow-blue-600/20 transition-all active:scale-95 flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Tambah Aset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search & Filter Bar -->
+                    <div class="glass-panel rounded-3xl p-3.5 flex flex-col md:flex-row gap-3 relative z-30">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-xs"></i>
+                            <input type="text" id="search-aset" placeholder="Cari nama, kode aset, atau ruangan..." class="w-full search-pill rounded-2xl py-2.5 pl-10 pr-4 text-xs md:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all">
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <div class="relative w-full sm:w-auto min-w-[180px] custom-dropdown-container">
+                                <input type="hidden" id="filter-kategori-val" value="Semua">
+                                <button type="button" onclick="toggleDropdownMenu(event, 'menu-filter-kategori', 'icon-filter-kategori')" class="w-full search-pill rounded-2xl py-2.5 px-4 text-left flex justify-between items-center text-xs md:text-sm font-bold transition-colors">
+                                    <span id="text-filter-kategori">Semua Kategori</span>
+                                    <i id="icon-filter-kategori" class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform duration-300"></i>
+                                </button>
+                                <div id="menu-filter-kategori" data-icon-id="icon-filter-kategori" class="custom-dropdown-menu absolute right-0 w-full sm:w-48 mt-2 rounded-2xl hidden flex-col p-1.5 z-50">
+                                    <div onclick="selectDropdownOption('Semua', 'Semua Kategori', 'text-filter-kategori', 'filter-kategori-val', 'menu-filter-kategori', 'icon-filter-kategori', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Semua Kategori</div>
+                                    <div onclick="selectDropdownOption('Elektronik', 'Elektronik', 'text-filter-kategori', 'filter-kategori-val', 'menu-filter-kategori', 'icon-filter-kategori', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Elektronik</div>
+                                    <div onclick="selectDropdownOption('Furnitur', 'Furnitur', 'text-filter-kategori', 'filter-kategori-val', 'menu-filter-kategori', 'icon-filter-kategori', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Furnitur</div>
+                                    <div onclick="selectDropdownOption('Fasilitas', 'Fasilitas', 'text-filter-kategori', 'filter-kategori-val', 'menu-filter-kategori', 'icon-filter-kategori', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Fasilitas</div>
+                                </div>
+                            </div>
+
+                            <div class="relative w-full sm:w-auto min-w-[180px] custom-dropdown-container">
+                                <input type="hidden" id="filter-kondisi-val" value="Semua">
+                                <button type="button" onclick="toggleDropdownMenu(event, 'menu-filter-kondisi', 'icon-filter-kondisi')" class="w-full search-pill rounded-2xl py-2.5 px-4 text-left flex justify-between items-center text-xs md:text-sm font-bold transition-colors">
+                                    <span id="text-filter-kondisi">Semua Kondisi</span>
+                                    <i id="icon-filter-kondisi" class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform duration-300"></i>
+                                </button>
+                                <div id="menu-filter-kondisi" data-icon-id="icon-filter-kondisi" class="custom-dropdown-menu absolute right-0 w-full sm:w-48 mt-2 rounded-2xl hidden flex-col p-1.5 z-50">
+                                    <div onclick="selectDropdownOption('Semua', 'Semua Kondisi', 'text-filter-kondisi', 'filter-kondisi-val', 'menu-filter-kondisi', 'icon-filter-kondisi', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Semua Kondisi</div>
+                                    <div onclick="selectDropdownOption('Baik', 'Baik', 'text-filter-kondisi', 'filter-kondisi-val', 'menu-filter-kondisi', 'icon-filter-kondisi', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Baik</div>
+                                    <div onclick="selectDropdownOption('Rusak Ringan', 'Rusak Ringan', 'text-filter-kondisi', 'filter-kondisi-val', 'menu-filter-kondisi', 'icon-filter-kondisi', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Rusak Ringan</div>
+                                    <div onclick="selectDropdownOption('Rusak Berat', 'Rusak Berat', 'text-filter-kondisi', 'filter-kondisi-val', 'menu-filter-kondisi', 'icon-filter-kondisi', true)" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Rusak Berat</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grouped Container -->
+                    <div id="aset-grouped-container" class="space-y-8"></div>
+                    
+                    <div id="empty-state" style="display: none;" class="flex-col items-center justify-center py-12 text-center">
+                        <div class="w-16 h-16 glass-card rounded-full flex items-center justify-center text-2xl text-slate-600 mb-3">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <p class="text-slate-700 text-sm font-bold">Tidak ada aset yang sesuai pencarian.</p>
+                    </div>
+                </div>
+
+                <!-- PEMINJAMAN VIEW -->
+                <div id="peminjaman-view" style="display: none;" class="w-full pb-12 animate-[fadeIn_0.3s_ease-out] space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Sirkulasi Peminjaman</h2>
+                            <p class="text-slate-500 font-medium text-xs md:text-sm mt-1">Pencatatan peminjaman dan pengembalian aset oleh guru & staf</p>
+                        </div>
+                        <button onclick="openModalPinjam()" class="w-full md:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs md:text-sm font-bold shadow-md shadow-blue-600/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Pinjam Aset
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                        <button onclick="filterPinjamStatus('Semua')" id="pill-pinjam-Semua" class="pill-pinjam filter-pill-active px-4 py-2 rounded-full text-xs shrink-0 transition-all font-extrabold bg-white text-blue-600 shadow-sm">Semua Sirkulasi</button>
+                        <button onclick="filterPinjamStatus('Pending')" id="pill-pinjam-Pending" class="pill-pinjam glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold">Menunggu Izin</button>
+                        <button onclick="filterPinjamStatus('Aktif')" id="pill-pinjam-Aktif" class="pill-pinjam glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold">Sedang Dipinjam</button>
+                        <button onclick="filterPinjamStatus('Selesai')" id="pill-pinjam-Selesai" class="pill-pinjam glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold">Selesai</button>
+                    </div>
+
+                    <div id="peminjaman-list" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                </div>
+
+                <!-- MAINTENANCE VIEW -->
+                <div id="maintenance-view" style="display: none;" class="w-full pb-12 animate-[fadeIn_0.3s_ease-out] space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Perbaikan & Perawatan Aset</h2>
+                            <p class="text-slate-500 font-medium text-xs md:text-sm mt-1">Dokumentasi laporan kerusakan dan tindak lanjut teknisi sarpras</p>
+                        </div>
+                        <button onclick="openModalMaintenance()" class="w-full md:w-auto px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-xs md:text-sm font-bold shadow-md shadow-rose-600/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-screwdriver-wrench"></i> Lapor Kerusakan
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                        <button onclick="filterMaintStatus('Semua')" id="pill-maint-Semua" class="pill-maint filter-pill-active px-4 py-2 rounded-full text-xs shrink-0 transition-all font-extrabold bg-white text-blue-600 shadow-sm">Semua Laporan</button>
+                        <button onclick="filterMaintStatus('Dilaporkan')" id="pill-maint-Dilaporkan" class="pill-maint glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold">Laporan Masuk</button>
+                        <button onclick="filterMaintStatus('Diproses')" id="pill-maint-Diproses" class="pill-maint glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold">Sedang Diperbaiki</button>
+                        <button onclick="filterMaintStatus('Selesai')" id="pill-maint-Selesai" class="pill-maint glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold">Selesai Diperbaiki</button>
+                    </div>
+
+                    <div id="maintenance-list" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                </div>
+
+                <!-- SCANNER VIEW -->
+                <div id="scanner-view" style="display: none;" class="w-full pb-12 flex flex-col items-center justify-center animate-[fadeIn_0.3s_ease-out]">
+                    <div class="w-full max-w-md flex justify-between items-center mb-5">
+                        <button onclick="showDashboard()" class="w-10 h-10 rounded-full glass-button flex items-center justify-center active:scale-95 transition-transform">
+                            <i class="fa-solid fa-arrow-left text-xs text-slate-900 font-bold"></i>
+                        </button>
+                        <h2 class="text-base md:text-lg font-extrabold text-slate-900">Pindai Barcode / QR Code Aset</h2>
+                        <div class="w-10 h-10"></div>
+                    </div>
+
+                    <div class="relative w-full max-w-sm aspect-[3/4] bg-slate-950/90 backdrop-blur-xl rounded-[32px] border-2 border-white/60 overflow-hidden shadow-2xl flex flex-col items-center justify-center p-6 text-center">
+                        <div class="relative w-3/4 aspect-square border border-white/20 rounded-2xl z-0 flex items-center justify-center">
+                            <div class="absolute -top-1 -left-1 w-10 h-10 border-t-4 border-l-4 border-blue-400 rounded-tl-2xl"></div>
+                            <div class="absolute -top-1 -right-1 w-10 h-10 border-t-4 border-r-4 border-blue-400 rounded-tr-2xl"></div>
+                            <div class="absolute -bottom-1 -left-1 w-10 h-10 border-b-4 border-l-4 border-blue-400 rounded-bl-2xl"></div>
+                            <div class="absolute -bottom-1 -right-1 w-10 h-10 border-b-4 border-r-4 border-blue-400 rounded-br-2xl"></div>
+                            <div id="scan-line-anim" class="absolute left-0 w-full h-1 bg-blue-400 shadow-[0_0_20px_4px_rgba(59,130,246,0.9)] animate-[scan-line_2s_linear_infinite]"></div>
+                            <i class="fa-solid fa-qrcode text-white/30 text-6xl"></i>
+                        </div>
+                        <div class="mt-6 z-10 w-full">
+                            <p class="text-xs text-white font-bold mb-2">Simulasi Deteksi Kode Aset</p>
+                            <input type="text" id="simulated-scan-code" placeholder="Ketik atau scan kode misal: INV-ALK-..." class="w-full bg-white/20 border border-white/30 text-white text-xs px-4 py-2.5 rounded-2xl text-center focus:outline-none placeholder:text-white/50 mb-3 font-mono">
+                            <button onclick="handleSimulatedScan()" class="w-full py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shadow-lg">Cek Data Aset</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+    <!-- MODALS -->
+    <!-- Modal Tambah Aset -->
+    <div id="modal-tambah" style="display: none;" class="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-md items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-[32px] p-6 md:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button onclick="closeModalTambah()" class="w-8 h-8 rounded-full glass-button flex items-center justify-center absolute top-5 right-5 text-slate-900 font-bold z-20">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900">Registrasi Aset & Barcode</h3>
+            </div>
+            
+            <form onsubmit="simpanAset(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Nama Aset</label>
+                    <input type="text" id="tambah-nama" required placeholder="Misal: Printer Epson L3110" class="w-full search-pill rounded-2xl py-3 px-4 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1.5 ml-1 mr-1">
+                        <label class="text-xs font-extrabold text-slate-900">Kode Inventaris / Barcode (Dapat Diedit)</label>
+                        <button type="button" onclick="generateRandomCode()" class="text-[11px] font-extrabold text-blue-600 hover:underline">✨ Buat Otomatis</button>
+                    </div>
+                    <input type="text" id="tambah-kode" required placeholder="Misal: INV-ALK-2026-999" class="w-full search-pill rounded-2xl py-3 px-4 text-xs md:text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative custom-dropdown-container z-50">
+                        <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Kategori</label>
+                        <input type="hidden" id="tambah-kategori-val" required>
+                        <button type="button" onclick="toggleDropdownMenu(event, 'menu-tambah-kategori', 'icon-tambah-kategori')" class="w-full search-pill rounded-2xl py-3 px-4 text-left flex justify-between items-center text-xs md:text-sm font-extrabold">
+                            <span id="text-tambah-kategori" class="text-slate-700 font-bold">-- Pilih Kategori --</span>
+                            <i id="icon-tambah-kategori" class="fa-solid fa-chevron-down text-slate-800 text-xs transition-transform duration-300"></i>
+                        </button>
+                        <div id="menu-tambah-kategori" data-icon-id="icon-tambah-kategori" class="custom-dropdown-menu absolute left-0 w-full mt-2 rounded-2xl hidden flex-col p-1.5 z-50">
+                            <div onclick="selectDropdownOption('Elektronik', 'Elektronik', 'text-tambah-kategori', 'tambah-kategori-val', 'menu-tambah-kategori', 'icon-tambah-kategori')" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Elektronik</div>
+                            <div onclick="selectDropdownOption('Furnitur', 'Furnitur', 'text-tambah-kategori', 'tambah-kategori-val', 'menu-tambah-kategori', 'icon-tambah-kategori')" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Furnitur</div>
+                            <div onclick="selectDropdownOption('Fasilitas', 'Fasilitas', 'text-tambah-kategori', 'tambah-kategori-val', 'menu-tambah-kategori', 'icon-tambah-kategori')" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer text-xs font-bold">Fasilitas</div>
+                        </div>
+                    </div>
+                    <div class="relative z-10">
+                        <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Lokasi Ruangan</label>
+                        <input type="text" id="tambah-lokasi" required placeholder="Misal: Kelas 4B" class="w-full search-pill rounded-2xl py-3 px-4 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Kondisi Awal</label>
+                    <div class="flex gap-5 mt-2 ml-1">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-900">
+                            <input type="radio" name="kondisi" value="Baik" checked class="accent-blue-600 w-4 h-4">
+                            <span>Baik</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-900">
+                            <input type="radio" name="kondisi" value="Rusak Ringan" class="accent-amber-500 w-4 h-4">
+                            <span>Rusak Ringan</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3.5 mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs md:text-sm font-extrabold shadow-lg shadow-blue-600/25 active:scale-95 transition-all">
+                    Simpan & Buat Label Aset
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Detail Aset & Barcode (Compact Popup + Professional Label Preview matching Ref image_b87bda.jpg) -->
+    <div id="modal-detail" style="display: none;" class="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-md items-center justify-center p-3">
+        <div class="glass-card w-full max-w-sm rounded-[28px] p-5 shadow-2xl relative text-center flex flex-col justify-between max-h-[92vh] overflow-y-auto no-scrollbar">
+            <button onclick="closeModalDetail()" class="w-8 h-8 rounded-full glass-button flex items-center justify-center absolute top-4 right-4 text-slate-900 font-bold z-20">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="text-left mb-2">
+                <h4 class="text-sm font-extrabold text-slate-900">Preview Kartu Label Inventaris</h4>
+                <p class="text-[11px] text-slate-500">Siap cetak untuk ditempel di barang</p>
+            </div>
+
+            <!-- Single Card Preview Box matching reference image_b87bda.jpg -->
+            <div id="modal-sticker-preview" class="bg-white border-2 border-purple-900 rounded-lg p-3 text-left w-full my-2 shadow-sm flex flex-col justify-between" style="min-height: 140px;">
+                <div style="background: #581c87; color: white; font-size: 9px; font-weight: 800; text-align: center; padding: 4px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase;">
+                    KARTU INVENTARIS BARANG · SDIT MUH. AL KAUTSAR
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+                    <div id="modal-qrcode-box" style="width: 64px; height: 64px; background: white; padding: 2px; border: 1px solid #cbd5e1; border-radius: 4px; display:flex; align-items:center; justify-content:center; shrink:0;"></div>
+                    <div style="font-size: 11px; color: #0f172a; line-height: 1.4; font-weight: 600; flex: 1;">
+                        <div>Kode: <strong id="modal-lbl-kode" style="color: #581c87; font-family: monospace;">--</strong></div>
+                        <div>Nama: <strong id="modal-lbl-nama">--</strong></div>
+                        <div>Lokasi: <span id="modal-lbl-lokasi">--</span></div>
+                        <div>Tahun: <span>2026</span> | Kondisi: <strong id="modal-lbl-kondisi" style="color: #15803d;">Baik</strong></div>
+                    </div>
+                </div>
+                <div style="font-size: 8px; color: #64748b; font-style: italic; text-align: center; border-top: 1px solid #f3e8ff; padding-top: 4px; margin-top: 6px;">
+                    Pindai QR untuk menuju data inventaris online
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-left text-[11px] font-bold text-slate-700 bg-white/70 rounded-2xl p-3 mb-3 border border-white">
+                <div>Status: <span id="detail-status" class="text-blue-600 font-extrabold">--</span></div>
+                <div>Kategori: <span id="detail-kategori" class="text-slate-900 font-extrabold">--</span></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="downloadSingleBarcodePDF()" class="py-2.5 rounded-full bg-purple-900 hover:bg-purple-950 text-white text-xs font-extrabold shadow flex items-center justify-center gap-1.5 active:scale-95 transition-all">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF Per Item
+                </button>
+                <button id="btn-hapus-aset" class="py-2.5 rounded-full glass-button text-rose-600 text-xs font-extrabold hover:bg-rose-50 active:scale-95 transition-all">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pinjam Aset -->
+    <div id="modal-pinjam" style="display: none;" class="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-md items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-[32px] p-6 md:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button onclick="closeModalPinjam()" class="w-8 h-8 rounded-full glass-button flex items-center justify-center absolute top-5 right-5 text-slate-900 font-bold z-20">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-hand-holding-hand"></i>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900">Form Peminjaman Aset</h3>
+            </div>
+            
+            <form onsubmit="simpanPinjaman(event)" class="space-y-4">
+                <div class="relative z-50 custom-dropdown-container">
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Pilih Aset (Tersedia)</label>
+                    <input type="hidden" id="pinjam-aset-select" required>
+                    <button type="button" onclick="toggleDropdownMenu(event, 'menu-pinjam-aset', 'icon-pinjam-aset')" class="w-full search-pill rounded-2xl py-3 px-4 text-left flex justify-between items-center text-xs md:text-sm font-extrabold">
+                        <span id="text-pinjam-aset" class="text-slate-700 font-bold">-- Pilih Aset --</span>
+                        <i id="icon-pinjam-aset" class="fa-solid fa-chevron-down text-slate-800 text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div id="menu-pinjam-aset" data-icon-id="icon-pinjam-aset" class="custom-dropdown-menu absolute left-0 w-full mt-2 rounded-2xl hidden flex-col max-h-52 overflow-y-auto no-scrollbar p-1.5 z-50"></div>
+                </div>
+                
+                <div class="relative z-10">
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Nama Peminjam & Jabatan</label>
+                    <input type="text" id="pinjam-peminjam" required placeholder="Misal: Ust. Budi (Guru Olahraga)" class="w-full search-pill rounded-2xl py-3 px-4 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 relative z-0">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Tanggal Pinjam</label>
+                        <input type="date" id="pinjam-tgl-mulai" required class="w-full search-pill rounded-2xl py-2.5 px-3.5 text-xs md:text-sm font-bold focus:outline-none text-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Tanggal Kembali</label>
+                        <input type="date" id="pinjam-tgl-kembali" required class="w-full search-pill rounded-2xl py-2.5 px-3.5 text-xs md:text-sm font-bold focus:outline-none text-slate-900">
+                    </div>
+                </div>
+                
+                <div class="relative z-0">
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Keperluan</label>
+                    <input type="text" id="pinjam-keperluan" required placeholder="Misal: Kegiatan senam pagi di lapangan" class="w-full search-pill rounded-2xl py-3 px-4 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+                </div>
+                
+                <button type="submit" class="w-full py-3.5 mt-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs md:text-sm font-extrabold shadow-lg active:scale-95 transition-all">
+                    Simpan Peminjaman
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Lapor Kerusakan -->
+    <div id="modal-maintenance" style="display: none;" class="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-md items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-[32px] p-6 md:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button onclick="closeModalMaintenance()" class="w-8 h-8 rounded-full glass-button flex items-center justify-center absolute top-5 right-5 text-slate-900 font-bold z-20">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <h3 class="text-lg font-extrabold text-slate-900">Lapor Kerusakan Sarpras</h3>
+            </div>
+            
+            <form onsubmit="simpanMaintenance(event)" class="space-y-4">
+                <div class="relative z-50 custom-dropdown-container">
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Pilih Aset Bermasalah</label>
+                    <input type="hidden" id="maint-aset-select" required>
+                    <button type="button" onclick="toggleDropdownMenu(event, 'menu-maint-aset', 'icon-maint-aset')" class="w-full search-pill rounded-2xl py-3 px-4 text-left flex justify-between items-center text-xs md:text-sm font-extrabold">
+                        <span id="text-maint-aset" class="text-slate-700 font-bold">-- Pilih Aset --</span>
+                        <i id="icon-maint-aset" class="fa-solid fa-chevron-down text-slate-800 text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div id="menu-maint-aset" data-icon-id="icon-maint-aset" class="custom-dropdown-menu absolute left-0 w-full mt-2 rounded-2xl hidden flex-col max-h-52 overflow-y-auto no-scrollbar p-1.5 z-50"></div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Pelapor & Lokasi</label>
+                    <input type="text" id="maint-pelapor" required placeholder="Misal: Ustazah Rina (Kelas 6C)" class="w-full search-pill rounded-2xl py-3 px-4 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-rose-500/40">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Deskripsi Kerusakan</label>
+                    <input type="text" id="maint-keluhan" required placeholder="Misal: AC tidak dingin dan bocor air" class="w-full search-pill rounded-2xl py-3 px-4 text-xs md:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-rose-500/40">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-900 mb-1.5 ml-1">Tingkat Kerusakan</label>
+                    <div class="flex gap-5 mt-2 ml-1">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-900">
+                            <input type="radio" name="tingkat_rusak" value="Rusak Ringan" checked class="accent-amber-500 w-4 h-4">
+                            <span>Rusak Ringan</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-900">
+                            <input type="radio" name="tingkat_rusak" value="Rusak Berat" class="accent-rose-600 w-4 h-4">
+                            <span>Rusak Berat</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 mt-2 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-xs md:text-sm font-extrabold shadow-lg shadow-rose-600/25 active:scale-95 transition-all">
+                    Kirim Laporan Perbaikan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Supabase SQL -->
+    <div id="modal-supabase" style="display: none;" class="fixed inset-0 z-[70] bg-slate-900/40 backdrop-blur-md items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-[32px] p-6 md:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button onclick="closeModalSupabase()" class="w-8 h-8 rounded-full glass-button flex items-center justify-center absolute top-5 right-5 text-slate-900 font-bold z-20">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div>
+                    <h3 class="text-base md:text-lg font-extrabold text-slate-900">Tabel Supabase (sarpras)</h3>
+                    <p id="supabase-modal-status" class="text-[11px] font-extrabold text-emerald-800">Tabel: public.sarpras • vjgydzodhejzwlvwxbmu.supabase.co</p>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-4 mb-3.5 text-xs text-slate-900 font-bold space-y-2 leading-relaxed">
+                <p>Data aplikasi terhubung langsung ke tabel <strong>`sarpras`</strong> di ekosistem <strong>MyAlka</strong>.</p>
+            </div>
+
+            <div class="relative mb-4">
+                <pre id="sql-schema-code" class="bg-slate-900 text-emerald-300 font-mono text-[10px] p-4 rounded-2xl overflow-x-auto leading-relaxed select-all">CREATE TABLE IF NOT EXISTS sarpras (
+  id BIGINT PRIMARY KEY,
+  kelompok_data TEXT NOT NULL,
+  aset_nama TEXT, aset_kode TEXT, aset_lokasi TEXT, aset_kategori TEXT, aset_kondisi TEXT, aset_status TEXT, aset_icon TEXT,
+  pinjam_peminjam TEXT, pinjam_aset TEXT, pinjam_tgl_mulai TEXT, pinjam_tgl_kembali TEXT, pinjam_keperluan TEXT, pinjam_status TEXT,
+  maint_aset TEXT, maint_pelapor TEXT, maint_keluhan TEXT, maint_tingkat TEXT, maint_tanggal TEXT, maint_status TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE sarpras DISABLE ROW LEVEL SECURITY;</pre>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2.5">
+                <button onclick="copySupabaseSQL()" class="flex-1 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <i class="fa-regular fa-copy"></i> Salin SQL Tabel
+                </button>
+                <button onclick="syncFromSupabase(true)" class="flex-1 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <i class="fa-solid fa-rotate"></i> Sinkronkan Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Container for Bulk F4 Sheet Printing (2 columns layout matching ref image_b87bda.jpg) -->
+    <div id="bulk-print-container" style="display:none; position:fixed; left:-9999px; top:0; width:794px; background:white; padding:30px; font-family:'Plus Jakarta Sans',sans-serif;"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://vjgydzodhejzwlvwxbmu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_m_i6gSzO4cdebG975Vqthw_Gn-iT2Uv';
+        const SUPABASE_TABLE = 'sarpras';
+        let supabaseClient = null;
+
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (err) {
+            console.warn('Supabase init warning:', err);
+        }
+
+        window.showToast = (message) => {
+            const toast = document.getElementById('app-toast');
+            const msgEl = document.getElementById('app-toast-msg');
+            if (!toast || !msgEl) return;
+            msgEl.textContent = message;
+            toast.classList.remove('opacity-0', '-translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-4');
+            }, 2600);
+        };
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let greetingText = 'Selamat Malam,';
+            if (hour >= 4 && hour < 11) greetingText = 'Selamat Pagi,';
+            else if (hour >= 11 && hour < 15) greetingText = 'Selamat Siang,';
+            else if (hour >= 15 && hour < 18) greetingText = 'Selamat Sore,';
+            
+            const desk = document.getElementById('greeting-desktop');
+            if(desk) desk.textContent = `${greetingText} Mas Ocid, S.Sarp.Ras.`;
+        }
+        updateGreeting();
+
+        window.addEventListener('message', (event) => {
+            if (!event.data || typeof event.data !== 'object') return;
+            if (event.data.type === 'MYALKA_USER' && event.data.name) {
+                const userEl = document.getElementById('portal-user-name');
+                if (userEl) userEl.textContent = event.data.name;
+            }
+            if (event.data.type === 'MYALKA_SYNC') {
+                syncFromSupabase(false);
+            }
+        });
+
+        let assetsData = [
+            { id: 1, nama: 'Proyektor Epson EB-X51', kode: 'INV-ALK-2023-045', lokasi: 'Kelas 4B', kategori: 'Elektronik', kondisi: 'Baik', status: 'Tersedia', icon: 'fa-video' },
+            { id: 2, nama: 'AC Daikin 1 PK', kode: 'INV-ALK-2022-012', lokasi: 'Kelas 6C', kategori: 'Elektronik', kondisi: 'Rusak Ringan', status: 'Maintenance', icon: 'fa-snowflake' },
+            { id: 3, nama: 'Meja Guru Kayu Jati', kode: 'INV-ALK-2020-088', lokasi: 'Kelas 1A', kategori: 'Furnitur', kondisi: 'Baik', status: 'Tersedia', icon: 'fa-chair' },
+            { id: 4, nama: 'Sound System Portable', kode: 'INV-ALK-2024-001', lokasi: 'Gudang Sarpras', kategori: 'Elektronik', kondisi: 'Baik', status: 'Dipinjam', icon: 'fa-volume-high' },
+            { id: 5, nama: 'Papan Tulis Kaca', kode: 'INV-ALK-2021-034', lokasi: 'Lab Komputer', kategori: 'Fasilitas', kondisi: 'Baik', status: 'Tersedia', icon: 'fa-chalkboard' },
+        ];
+
+        let peminjamanData = [
+            { id: 101, peminjam: 'Ust. Budi (Guru Olahraga)', aset: 'Sound System Portable', tgl_pinjam: '2026-10-20', tgl_kembali: '2026-10-21', keperluan: 'Senam Pagi di Lapangan Utama', status: 'Aktif' },
+            { id: 102, peminjam: 'Ustazah Siti (Wali Kelas 1)', aset: 'Proyektor Epson EB-X51', tgl_pinjam: '2026-10-20', tgl_kembali: '2026-10-20', keperluan: 'Nobar Sejarah Islam Kelas 1', status: 'Pending' },
+        ];
+
+        let maintenanceData = [
+            { id: 201, aset: 'AC Daikin 1 PK', pelapor: 'Ustazah Rina (Wali Kelas 6C)', keluhan: 'AC kurang dingin dan indikator berkedip', tingkat: 'Rusak Ringan', tanggal: '2026-10-19', status: 'Diproses' },
+            { id: 202, aset: 'Meja Guru Kayu Jati', pelapor: 'Ust. Ahmad (Kelas 1A)', keluhan: 'Laci meja macet perlu pelumas/perbaikan engsel', tingkat: 'Rusak Ringan', tanggal: '2026-10-20', status: 'Dilaporkan' }
+        ];
+
+        let activePinjamFilter = 'Semua';
+        let activeMaintFilter = 'Semua';
+
+        function mapAsetToRow(a) {
+            return {
+                id: a.id, kelompok_data: 'ASET',
+                aset_nama: a.nama, aset_kode: a.kode, aset_lokasi: a.lokasi, aset_kategori: a.kategori, aset_kondisi: a.kondisi, aset_status: a.status, aset_icon: a.icon || 'fa-box'
+            };
+        }
+        function mapRowToAset(r) {
+            return {
+                id: r.id, nama: r.aset_nama || '-', kode: r.aset_kode || '-', lokasi: r.aset_lokasi || '-', kategori: r.aset_kategori || 'Elektronik', kondisi: r.aset_kondisi || 'Baik', status: r.aset_status || 'Tersedia', icon: r.aset_icon || 'fa-box'
+            };
+        }
+        function mapPinjamToRow(p) {
+            return {
+                id: p.id, kelompok_data: 'PEMINJAMAN',
+                pinjam_peminjam: p.peminjam, pinjam_aset: p.aset, pinjam_tgl_mulai: p.tgl_pinjam, pinjam_tgl_kembali: p.tgl_kembali, pinjam_keperluan: p.keperluan, pinjam_status: p.status
+            };
+        }
+        function mapRowToPinjam(r) {
+            return {
+                id: r.id, peminjam: r.pinjam_peminjam || '-', aset: r.pinjam_aset || '-', tgl_pinjam: r.pinjam_tgl_mulai || '', tgl_kembali: r.pinjam_tgl_kembali || '', keperluan: r.pinjam_keperluan || '-', status: r.pinjam_status || 'Pending'
+            };
+        }
+        function mapMaintToRow(m) {
+            return {
+                id: m.id, kelompok_data: 'MAINTENANCE',
+                maint_aset: m.aset, maint_pelapor: m.pelapor, maint_keluhan: m.keluhan, maint_tingkat: m.tingkat, maint_tanggal: m.tanggal, maint_status: m.status
+            };
+        }
+        function mapRowToMaint(r) {
+            return {
+                id: r.id, aset: r.maint_aset || '-', pelapor: r.maint_pelapor || '-', keluhan: r.maint_keluhan || '-', tingkat: r.maint_tingkat || 'Rusak Ringan', tanggal: r.maint_tanggal || '', status: r.maint_status || 'Dilaporkan'
+            };
+        }
+
+        window.syncFromSupabase = async (manualNotify = false) => {
+            if (!supabaseClient) return;
+            const statusEl = document.getElementById('supabase-modal-status');
+            const labelDesk = document.getElementById('supabase-label-desktop');
+
+            try {
+                const { data: rows, error } = await supabaseClient
+                    .from(SUPABASE_TABLE)
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (!error && Array.isArray(rows)) {
+                    if (rows.length > 0) {
+                        const dbAset = rows.filter(r => r.kelompok_data === 'ASET').map(mapRowToAset);
+                        const dbPinjam = rows.filter(r => r.kelompok_data === 'PEMINJAMAN').map(mapRowToPinjam);
+                        const dbMaint = rows.filter(r => r.kelompok_data === 'MAINTENANCE').map(mapRowToMaint);
+
+                        if (dbAset.length > 0) assetsData = dbAset;
+                        if (dbPinjam.length > 0) peminjamanData = dbPinjam;
+                        if (dbMaint.length > 0) maintenanceData = dbMaint;
+                    } else {
+                        const initialRows = [
+                            ...assetsData.map(mapAsetToRow),
+                            ...peminjamanData.map(mapPinjamToRow),
+                            ...maintenanceData.map(mapMaintToRow)
+                        ];
+                        await supabaseClient.from(SUPABASE_TABLE).upsert(initialRows);
+                    }
+
+                    if (statusEl) statusEl.textContent = 'Tabel public.sarpras Aktif & Tersinkronisasi';
+                    if (labelDesk) labelDesk.textContent = 'Supabase Cloud';
+                    if (manualNotify) showToast('Data berhasil disinkronkan dengan Supabase!');
+                } else if (manualNotify) {
+                    showToast('Gagal sinkron: ' + (error ? error.message : 'Tabel belum ada'));
+                }
+            } catch (e) {
+                console.warn('Supabase sync info:', e);
+            }
+            refreshAllUI();
+        };
+
+        window.refreshAllUI = () => {
+            updateDashboardStatsAndLists();
+            if (typeof window.applyFilters === 'function') window.applyFilters();
+            renderPeminjaman();
+            renderMaintenance();
+        };
+
+        function updateDashboardStatsAndLists() {
+            const totalAset = assetsData.length;
+            const sedangPinjam = peminjamanData.filter(p => p.status === 'Aktif' || p.status === 'Pending').length;
+            const sedangMaint = maintenanceData.filter(m => m.status !== 'Selesai').length;
+            const asetBaik = assetsData.filter(a => a.kondisi === 'Baik').length;
+            const persenBaik = totalAset > 0 ? Math.round((asetBaik / totalAset) * 100) : 100;
+
+            const statAset = document.getElementById('stat-total-aset');
+            const statPinjam = document.getElementById('stat-total-pinjam');
+            const statMaint = document.getElementById('stat-total-maint');
+            const statBaik = document.getElementById('stat-persen-baik');
+            
+            if (statAset) statAset.textContent = totalAset;
+            if (statPinjam) statPinjam.textContent = sedangPinjam;
+            if (statMaint) statMaint.textContent = sedangMaint;
+            if (statBaik) statBaik.textContent = persenBaik + '%';
+
+            document.getElementById('badge-side-aset').textContent = totalAset;
+            document.getElementById('badge-side-pinjam').textContent = sedangPinjam;
+            document.getElementById('badge-side-maint').textContent = sedangMaint;
+
+            // Render recent list on Dashboard
+            const recentContainer = document.getElementById('dashboard-recent-list');
+            if (recentContainer) {
+                recentContainer.innerHTML = '';
+                assetsData.slice(0, 4).forEach(aset => {
+                    recentContainer.innerHTML += `
+                        <div class="glass-panel rounded-2xl p-3.5 flex items-center justify-between cursor-pointer hover:bg-white transition-all" onclick="bukaDetailAset(${aset.id})">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">
+                                    <i class="fa-solid ${aset.icon || 'fa-box'}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-extrabold text-slate-900">${aset.nama}</h4>
+                                    <p class="text-[10px] text-slate-500 font-mono">${aset.lokasi} • ${aset.kode}</p>
+                                </div>
+                            </div>
+                            <span class="text-[11px] font-extrabold px-3 py-1 rounded-full ${aset.status === 'Tersedia' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}">${aset.status}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        window.toggleDropdownMenu = (e, menuId, iconId) => {
+            if(e) e.stopPropagation();
+            document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+                if (menu.id !== menuId && !menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                    let relatedIcon = document.getElementById(menu.getAttribute('data-icon-id'));
+                    if (relatedIcon) relatedIcon.classList.remove('rotate-180');
+                }
+            });
+
+            const menu = document.getElementById(menuId);
+            const icon = document.getElementById(iconId);
+            if(!menu) return;
+
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                if(icon) icon.classList.add('rotate-180');
+            } else {
+                menu.classList.add('hidden');
+                if(icon) icon.classList.remove('rotate-180');
+            }
+        };
+
+        window.selectDropdownOption = (value, text, textId, inputId, menuId, iconId, isFilter = false) => {
+            const hiddenInput = document.getElementById(inputId);
+            if(hiddenInput) hiddenInput.value = value;
+            
+            const textEl = document.getElementById(textId);
+            if(textEl) {
+                textEl.textContent = text;
+                textEl.classList.remove('text-slate-700');
+                textEl.classList.add('text-slate-900', 'font-extrabold');
+            }
+            toggleDropdownMenu(null, menuId, iconId);
+            if (isFilter && typeof window.applyFilters === 'function') {
+                window.applyFilters();
+            }
+        };
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-dropdown-container')) {
+                document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+                    menu.classList.add('hidden');
+                    let relatedIcon = document.getElementById(menu.getAttribute('data-icon-id'));
+                    if (relatedIcon) relatedIcon.classList.remove('rotate-180');
+                });
+            }
+        });
+
+        window.formatTanggalIndo = (tanggalStr) => {
+            if (!tanggalStr) return '-';
+            const date = new Date(tanggalStr);
+            if (isNaN(date)) return tanggalStr;
+            const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
+        };
+
+        // Render Grouped Assets with Category Themes & Status Color Pills at bottom
+        window.renderGroupedAssets = (data) => {
+            const container = document.getElementById('aset-grouped-container');
+            const emptyState = document.getElementById('empty-state');
+            if(!container) return;
+            
+            container.innerHTML = '';
+            if(data.length === 0) {
+                if(emptyState) emptyState.style.display = 'flex';
+                return;
+            }
+            if(emptyState) emptyState.style.display = 'none';
+
+            const categories = [
+                { name: 'Elektronik', themeClass: 'card-elektronik', badgeColor: 'bg-blue-600 text-white', animIcon: 'fa-bolt anim-element' },
+                { name: 'Furnitur', themeClass: 'card-furnitur', badgeColor: 'bg-amber-600 text-white', animIcon: 'fa-chair anim-element' },
+                { name: 'Fasilitas', themeClass: 'card-fasilitas', badgeColor: 'bg-emerald-600 text-white', animIcon: 'fa-building-columns anim-element' }
+            ];
+
+            let hasAny = false;
+
+            categories.forEach(cat => {
+                const itemsInCat = data.filter(a => a.kategori === cat.name);
+                if (itemsInCat.length === 0) return;
+                hasAny = true;
+
+                let categoryCardsHtml = '';
+                itemsInCat.forEach(aset => {
+                    let conditionColor = aset.kondisi === 'Baik' ? 'text-emerald-800 bg-emerald-50 border-emerald-200' : 
+                                         (aset.kondisi === 'Rusak Ringan' ? 'text-amber-800 bg-amber-200' : 'text-rose-800 bg-rose-200');
+                    
+                    let statusPillBg = '';
+                    let dotBg = '';
+                    if (aset.status === 'Tersedia') {
+                        statusPillBg = 'bg-emerald-100/90 text-emerald-900 border border-emerald-300';
+                        dotBg = 'bg-emerald-600';
+                    } else if (aset.status === 'Dipinjam') {
+                        statusPillBg = 'bg-blue-100/90 text-blue-900 border border-blue-300';
+                        dotBg = 'bg-blue-600';
+                    } else {
+                        statusPillBg = 'bg-rose-100/90 text-rose-900 border border-rose-300';
+                        dotBg = 'bg-rose-600';
+                    }
+
+                    categoryCardsHtml += `
+                        <div onclick="bukaDetailAset(${aset.id})" class="${cat.themeClass} rounded-[24px] p-5 flex flex-col justify-between hover:scale-[1.01] transition-all cursor-pointer group shadow-sm">
+                            <div>
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-white/90 text-slate-900 flex items-center justify-center text-sm shadow group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid ${aset.icon || 'fa-box'}"></i>
+                                    </div>
+                                    <span class="text-[10px] px-2.5 py-1 rounded-full border ${conditionColor} font-extrabold">${aset.kondisi}</span>
+                                </div>
+                                <h4 class="font-extrabold text-sm text-slate-900 truncate">${aset.nama}</h4>
+                                <p class="text-[11px] text-slate-600 font-mono mt-0.5">${aset.kode} • ${aset.lokasi}</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-black/10 flex items-center justify-between">
+                                <span class="text-xs font-extrabold px-3 py-1.5 rounded-xl ${statusPillBg} flex items-center gap-1.5 shadow-xs">
+                                    <span class="w-2.5 h-2.5 rounded-full ${dotBg}"></span> 
+                                    ${aset.status}
+                                </span>
+                                <span class="text-xs font-extrabold text-blue-700 group-hover:underline flex items-center gap-1">Detail →</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="space-y-3.5">
+                        <div class="flex items-center justify-between pb-1.5 border-b border-slate-200/60">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-xl ${cat.badgeColor} flex items-center justify-center text-xs shadow">
+                                    <i class="fa-solid ${cat.animIcon}"></i>
+                                </div>
+                                <h3 class="text-base font-extrabold text-slate-900 tracking-tight">Kategori: ${cat.name}</h3>
+                                <span class="text-xs font-bold text-slate-600 bg-white/80 px-2.5 py-0.5 rounded-full border">${itemsInCat.length} Aset</span>
+                            </div>
+                            <button onclick="setCategoryFilter('${cat.name}')" class="text-xs font-extrabold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer bg-white/80 px-3 py-1 rounded-full border border-blue-100 shadow-xs">
+                                Lihat Semua (${itemsInCat.length}) →
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${categoryCardsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (!hasAny && emptyState) {
+                emptyState.style.display = 'flex';
+            }
+        };
+
+        window.setCategoryFilter = (catName) => {
+            selectDropdownOption(catName, catName, 'text-filter-kategori', 'filter-kategori-val', 'menu-filter-kategori', 'icon-filter-kategori', true);
+        };
+
+        window.filterPinjamStatus = (status) => {
+            activePinjamFilter = status;
+            document.querySelectorAll('.pill-pinjam').forEach(btn => {
+                btn.className = 'pill-pinjam glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold';
+            });
+            const activeBtn = document.getElementById('pill-pinjam-' + status);
+            if (activeBtn) activeBtn.className = 'pill-pinjam filter-pill-active px-4 py-2 rounded-full text-xs shrink-0 transition-all font-extrabold bg-white text-blue-600 shadow-sm';
+            renderPeminjaman();
+        };
+
+        window.renderPeminjaman = () => {
+            const list = document.getElementById('peminjaman-list');
+            if(!list) return;
+            list.innerHTML = '';
+            const filtered = activePinjamFilter === 'Semua' ? peminjamanData : peminjamanData.filter(i => i.status === activePinjamFilter);
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="glass-panel rounded-3xl p-8 text-center text-xs text-slate-700 font-bold col-span-2">Tidak ada data peminjaman pada kategori ini.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let badgeClass = '';
+                let actionBtns = '';
+                if (item.status === 'Pending') {
+                    badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                    actionBtns = `
+                        <button onclick="updateStatusPinjaman(${item.id}, 'Aktif')" class="px-4 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shadow-sm">Setujui</button>
+                        <button onclick="updateStatusPinjaman(${item.id}, 'Ditolak')" class="px-3.5 py-1.5 rounded-full glass-button text-rose-600 text-xs font-extrabold">Tolak</button>
+                    `;
+                } else if (item.status === 'Aktif') {
+                    badgeClass = 'bg-blue-50 text-blue-700 border-blue-200';
+                    actionBtns = `
+                        <button onclick="updateStatusPinjaman(${item.id}, 'Selesai')" class="px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm"><i class="fa-solid fa-check mr-1"></i> Terima Kembali</button>
+                    `;
+                } else {
+                    badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    actionBtns = `<span class="text-xs text-slate-600 font-extrabold"><i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> ${item.status}</span>`;
+                }
+
+                const initials = item.peminjam.split(' ').slice(0,2).map(w => w[0]).join('');
+
+                list.innerHTML += `
+                    <div class="glass-card rounded-[26px] p-5 flex flex-col justify-between gap-4">
+                        <div class="flex gap-3.5">
+                            <div class="w-11 h-11 rounded-full bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow">
+                                ${initials}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                    <h4 class="font-extrabold text-sm text-slate-900 truncate">${item.peminjam}</h4>
+                                    <span class="text-[10px] px-2.5 py-0.5 rounded-full border ${badgeClass} font-extrabold">${item.status}</span>
+                                </div>
+                                <p class="text-xs font-extrabold text-blue-600 mb-2"><i class="fa-solid fa-boxes-stacked mr-1"></i> ${item.aset}</p>
+                                <p class="text-xs text-slate-700 font-medium bg-white/60 px-3 py-2 rounded-2xl border mb-2">"${item.keperluan}"</p>
+                                <div class="flex flex-wrap gap-4 text-[11px] text-slate-500 font-bold">
+                                    <span><i class="fa-regular fa-calendar mr-1"></i> Pinjam: ${formatTanggalIndo(item.tgl_pinjam)}</span>
+                                    <span><i class="fa-regular fa-calendar-check mr-1"></i> Kembali: ${formatTanggalIndo(item.tgl_kembali)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                            ${actionBtns}
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.filterMaintStatus = (status) => {
+            activeMaintFilter = status;
+            document.querySelectorAll('.pill-maint').forEach(btn => {
+                btn.className = 'pill-maint glass-button px-4 py-2 rounded-full text-xs shrink-0 transition-all font-bold';
+            });
+            const activeBtn = document.getElementById('pill-maint-' + status);
+            if (activeBtn) activeBtn.className = 'pill-maint filter-pill-active px-4 py-2 rounded-full text-xs shrink-0 transition-all font-extrabold bg-white text-blue-600 shadow-sm';
+            renderMaintenance();
+        };
+
+        window.renderMaintenance = () => {
+            const list = document.getElementById('maintenance-list');
+            if (!list) return;
+            list.innerHTML = '';
+            const filtered = activeMaintFilter === 'Semua' ? maintenanceData : maintenanceData.filter(m => m.status === activeMaintFilter);
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="glass-panel rounded-3xl p-8 text-center text-xs text-slate-700 font-bold col-span-2">Tidak ada tiket perbaikan pada status ini.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let badgeClass = '';
+                let actionBtns = '';
+                if (item.status === 'Dilaporkan') {
+                    badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+                    actionBtns = `<button onclick="updateStatusMaintenance(${item.id}, 'Diproses')" class="px-4 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold shadow-sm">Proses Perbaikan</button>`;
+                } else if (item.status === 'Diproses') {
+                    badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                    actionBtns = `<button onclick="updateStatusMaintenance(${item.id}, 'Selesai')" class="px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm"><i class="fa-solid fa-check mr-1"></i> Selesai Diperbaiki</button>`;
+                } else {
+                    badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    actionBtns = `<span class="text-xs text-slate-600 font-extrabold"><i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Kondisi Normal</span>`;
+                }
+
+                list.innerHTML += `
+                    <div class="glass-card rounded-[26px] p-5 flex flex-col justify-between gap-4">
+                        <div class="flex gap-3.5">
+                            <div class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 font-bold text-sm flex items-center justify-center shrink-0 border border-rose-200">
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                    <h4 class="font-extrabold text-sm text-slate-900 truncate">${item.aset}</h4>
+                                    <span class="text-[10px] px-2.5 py-0.5 rounded-full border ${badgeClass} font-extrabold">${item.status}</span>
+                                    <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold">${item.tingkat}</span>
+                                </div>
+                                <p class="text-xs font-extrabold text-slate-700 mb-2">Pelapor: ${item.pelapor}</p>
+                                <p class="text-xs text-slate-600 font-medium bg-white/60 px-3 py-2 rounded-2xl border mb-2">Keluhan: "${item.keluhan}"</p>
+                                <div class="text-[11px] text-slate-500 font-bold">
+                                    <span><i class="fa-regular fa-clock mr-1"></i> Dilaporkan: ${formatTanggalIndo(item.tanggal)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                            ${actionBtns}
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        function updateNavActiveState(activeKey) {
+            document.querySelectorAll('.top-nav-item').forEach(el => {
+                el.classList.remove('nav-item-active', 'font-extrabold');
+                el.classList.add('text-slate-600', 'font-semibold');
+            });
+            const activeTop = document.getElementById('top-nav-' + activeKey);
+            if(activeTop) {
+                activeTop.classList.add('nav-item-active', 'font-extrabold');
+                activeTop.classList.remove('text-slate-600', 'font-semibold');
+            }
+        }
+
+        window.hideAllViews = () => {
+            ['dashboard-view', 'scanner-view', 'aset-view', 'peminjaman-view', 'maintenance-view'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        };
+        
+        window.showDashboard = () => {
+            hideAllViews();
+            updateNavActiveState('dashboard');
+            updateDashboardStatsAndLists();
+            document.getElementById('dashboard-view').style.display = 'block';
+        };
+
+        window.showAsetView = () => {
+            hideAllViews();
+            updateNavActiveState('aset');
+            document.getElementById('aset-view').style.display = 'block';
+            if (typeof window.applyFilters === 'function') window.applyFilters();
+        };
+
+        window.showPeminjamanView = () => {
+            hideAllViews();
+            updateNavActiveState('pinjam');
+            renderPeminjaman();
+            document.getElementById('peminjaman-view').style.display = 'block';
+        };
+
+        window.showMaintenanceView = () => {
+            hideAllViews();
+            updateNavActiveState('maintenance');
+            renderMaintenance();
+            document.getElementById('maintenance-view').style.display = 'block';
+        };
+
+        window.startScanner = () => {
+            hideAllViews();
+            updateNavActiveState('scanner');
+            document.getElementById('scanner-view').style.display = 'flex';
+        };
+
+        window.handleSimulatedScan = () => {
+            const val = document.getElementById('simulated-scan-code').value.trim();
+            if (!val) { showToast('Masukkan kode aset terlebih dahulu!'); return; }
+            const found = assetsData.find(a => a.kode.toLowerCase() === val.toLowerCase() || a.nama.toLowerCase().includes(val.toLowerCase()));
+            if (found) {
+                showToast(`Aset ditemukan: ${found.nama}`);
+                bukaDetailAset(found.id);
+            } else {
+                showToast(`Aset dengan kode "${val}" tidak ditemukan.`);
+            }
+        };
+
+        window.openModalSupabase = () => { document.getElementById('modal-supabase').style.display = 'flex'; };
+        window.closeModalSupabase = () => { document.getElementById('modal-supabase').style.display = 'none'; };
+        window.copySupabaseSQL = () => {
+            const code = document.getElementById('sql-schema-code').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = code; document.body.appendChild(textarea);
+            textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea);
+            showToast('SQL berhasil disalin!');
+        };
+
+        window.generateRandomCode = () => {
+            const codeField = document.getElementById('tambah-kode');
+            if (codeField) {
+                codeField.value = 'INV-ALK-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+            }
+        };
+
+        window.openModalTambah = () => {
+            document.getElementById('tambah-kategori-val').value = '';
+            const textEl = document.getElementById('text-tambah-kategori');
+            textEl.textContent = '-- Pilih Kategori --';
+            textEl.className = 'text-slate-700 font-bold';
+            generateRandomCode();
+            document.getElementById('modal-tambah').style.display = 'flex';
+        };
+        window.closeModalTambah = () => { document.getElementById('modal-tambah').style.display = 'none'; };
+
+        window.openModalPinjam = () => {
+            const menu = document.getElementById('menu-pinjam-aset');
+            menu.innerHTML = '';
+            document.getElementById('pinjam-aset-select').value = '';
+            const textEl = document.getElementById('text-pinjam-aset');
+            textEl.textContent = '-- Pilih Aset --';
+            textEl.className = 'text-slate-700 font-bold';
+
+            let asetTersedia = assetsData.filter(a => a.status === 'Tersedia');
+            if(asetTersedia.length === 0) {
+                menu.innerHTML = `<div class="p-3 text-center text-slate-500 text-xs italic">Tidak ada aset tersedia.</div>`;
+            } else {
+                asetTersedia.forEach(aset => {
+                    menu.innerHTML += `
+                        <div onclick="selectDropdownOption('${aset.nama}', '${aset.nama}', 'text-pinjam-aset', 'pinjam-aset-select', 'menu-pinjam-aset', 'icon-pinjam-aset')" class="p-2.5 rounded-xl hover:bg-blue-50 cursor-pointer flex flex-col gap-0.5">
+                            <span class="text-xs font-extrabold text-slate-900">${aset.nama}</span>
+                            <span class="text-[10px] text-slate-500 font-mono">${aset.kode} • ${aset.lokasi}</span>
+                        </div>
+                    `;
+                });
+            }
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pinjam-tgl-mulai').value = today;
+            document.getElementById('pinjam-tgl-kembali').value = today;
+            document.getElementById('modal-pinjam').style.display = 'flex';
+        };
+        window.closeModalPinjam = () => { document.getElementById('modal-pinjam').style.display = 'none'; };
+
+        window.openModalMaintenance = () => {
+            const menu = document.getElementById('menu-maint-aset');
+            menu.innerHTML = '';
+            document.getElementById('maint-aset-select').value = '';
+            const textEl = document.getElementById('text-maint-aset');
+            textEl.textContent = '-- Pilih Aset --';
+            textEl.className = 'text-slate-700 font-bold';
+
+            assetsData.forEach(aset => {
+                menu.innerHTML += `
+                    <div onclick="selectDropdownOption('${aset.nama}', '${aset.nama}', 'text-maint-aset', 'maint-aset-select', 'menu-maint-aset', 'icon-maint-aset')" class="p-2.5 rounded-xl hover:bg-rose-50 cursor-pointer flex flex-col gap-0.5">
+                        <span class="text-xs font-extrabold text-slate-900">${aset.nama}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">${aset.lokasi} (${aset.kode})</span>
+                    </div>
+                `;
+            });
+            document.getElementById('modal-maintenance').style.display = 'flex';
+        };
+        window.closeModalMaintenance = () => { document.getElementById('modal-maintenance').style.display = 'none'; };
+
+        window.simpanAset = async (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('tambah-nama').value;
+            const kode = document.getElementById('tambah-kode').value;
+            const lokasi = document.getElementById('tambah-lokasi').value;
+            const kategori = document.getElementById('tambah-kategori-val').value;
+            const kondisi = e.target.querySelector('input[type="radio"]:checked').value;
+            
+            if (!kategori) { showToast("Silakan pilih kategori aset."); return; }
+
+            const iconMap = { 'Elektronik': 'fa-plug-circle-bolt', 'Furnitur': 'fa-chair', 'Fasilitas': 'fa-building-columns' };
+            const newItem = {
+                id: Date.now(), nama: nama, kode: kode,
+                lokasi: lokasi, kategori: kategori, kondisi: kondisi, status: kondisi === 'Baik' ? 'Tersedia' : 'Maintenance', icon: iconMap[kategori] || 'fa-box'
+            };
+
+            assetsData.unshift(newItem);
+            refreshAllUI();
+            closeModalTambah();
+            e.target.reset();
+
+            if (supabaseClient) {
+                await supabaseClient.from(SUPABASE_TABLE).upsert([mapAsetToRow(newItem)]);
+            }
+            showToast("Aset baru berhasil disimpan dengan QR Code!");
+        };
+
+        window.simpanPinjaman = async (e) => {
+            e.preventDefault();
+            const aset = document.getElementById('pinjam-aset-select').value;
+            const peminjam = document.getElementById('pinjam-peminjam').value;
+            const tglMulai = document.getElementById('pinjam-tgl-mulai').value;
+            const tglKembali = document.getElementById('pinjam-tgl-kembali').value;
+            const keperluan = document.getElementById('pinjam-keperluan').value;
+            
+            if(!aset) { showToast("Silakan pilih aset."); return; }
+
+            const newPinjam = {
+                id: Date.now(), peminjam: peminjam, aset: aset, tgl_pinjam: tglMulai, tgl_kembali: tglKembali, keperluan: keperluan, status: 'Pending'
+            };
+
+            peminjamanData.unshift(newPinjam);
+            if (supabaseClient) {
+                await supabaseClient.from(SUPABASE_TABLE).upsert([mapPinjamToRow(newPinjam)]);
+            }
+            refreshAllUI();
+            closeModalPinjam();
+            e.target.reset();
+            showToast("Peminjaman berhasil dicatat!");
+        };
+
+        window.updateStatusPinjaman = async (id, newStatus) => {
+            const pinjaman = peminjamanData.find(p => p.id === id);
+            if(pinjaman) {
+                pinjaman.status = newStatus;
+                const asetRef = assetsData.find(a => a.nama === pinjaman.aset);
+
+                if (newStatus === 'Aktif' && asetRef) asetRef.status = 'Dipinjam';
+                else if ((newStatus === 'Selesai' || newStatus === 'Ditolak') && asetRef) asetRef.status = 'Tersedia';
+
+                if (supabaseClient) {
+                    const rows = [mapPinjamToRow(pinjaman)];
+                    if (asetRef) rows.push(mapAsetToRow(asetRef));
+                    await supabaseClient.from(SUPABASE_TABLE).upsert(rows);
+                }
+                refreshAllUI();
+                showToast(`Status peminjaman diperbarui: ${newStatus}`);
+            }
+        };
+
+        window.simpanMaintenance = async (e) => {
+            e.preventDefault();
+            const asetNama = document.getElementById('maint-aset-select').value;
+            const pelapor = document.getElementById('maint-pelapor').value;
+            const keluhan = document.getElementById('maint-keluhan').value;
+            const tingkat = e.target.querySelector('input[type="radio"]:checked').value;
+
+            if (!asetNama) { showToast("Silakan pilih aset."); return; }
+
+            const newMaint = {
+                id: Date.now(), aset: asetNama, pelapor: pelapor, keluhan: keluhan, tingkat: tingkat, tanggal: new Date().toISOString().split('T')[0], status: 'Dilaporkan'
+            };
+
+            maintenanceData.unshift(newMaint);
+            const asetRef = assetsData.find(a => a.nama === asetNama);
+            if (asetRef) { asetRef.kondisi = tingkat; asetRef.status = 'Maintenance'; }
+
+            if (supabaseClient) {
+                const rows = [mapMaintToRow(newMaint)];
+                if (asetRef) rows.push(mapAsetToRow(asetRef));
+                await supabaseClient.from(SUPABASE_TABLE).upsert(rows);
+            }
+            refreshAllUI();
+            closeModalMaintenance();
+            e.target.reset();
+            showToast("Laporan perbaikan terkirim!");
+        };
+
+        window.updateStatusMaintenance = async (id, newStatus) => {
+            const item = maintenanceData.find(m => m.id === id);
+            if (!item) return;
+
+            item.status = newStatus;
+            const asetRef = assetsData.find(a => a.nama === item.aset);
+            if (newStatus === 'Selesai' && asetRef) { asetRef.kondisi = 'Baik'; asetRef.status = 'Tersedia'; }
+
+            if (supabaseClient) {
+                const rows = [mapRowToMaint ? mapMaintToRow(item) : item];
+                if (asetRef) rows.push(mapAsetToRow(asetRef));
+                await supabaseClient.from(SUPABASE_TABLE).upsert(rows);
+            }
+            refreshAllUI();
+            showToast(`Status perbaikan diperbarui: ${newStatus}`);
+        };
+
+        window.hapusAset = async (id) => {
+            assetsData = assetsData.filter(a => a.id !== id);
+            if (supabaseClient) await supabaseClient.from(SUPABASE_TABLE).delete().eq('id', id);
+            closeModalDetail();
+            refreshAllUI();
+            showToast("Data aset dihapus.");
+        };
+
+        window.currentSelectedAsset = null;
+
+        window.bukaDetailAset = (id) => {
+            const aset = assetsData.find(a => a.id === id);
+            if(aset) {
+                window.currentSelectedAsset = aset;
+                document.getElementById('modal-lbl-nama').textContent = aset.nama;
+                document.getElementById('modal-lbl-kode').textContent = aset.kode;
+                document.getElementById('modal-lbl-lokasi').textContent = aset.lokasi;
+                document.getElementById('modal-lbl-kondisi').textContent = aset.kondisi;
+                document.getElementById('detail-kategori').textContent = aset.kategori;
+                document.getElementById('detail-status').textContent = aset.status;
+                
+                // Generate QR Code inside modal preview matching image_b87bda.jpg
+                const qrcodeContainer = document.getElementById('modal-qrcode-box');
+                qrcodeContainer.innerHTML = '';
+                new QRCode(qrcodeContainer, {
+                    text: aset.kode,
+                    width: 60,
+                    height: 60,
+                    colorDark: "#581c87",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                const btnHapus = document.getElementById('btn-hapus-aset');
+                if (btnHapus) btnHapus.onclick = () => hapusAset(aset.id);
+                document.getElementById('modal-detail').style.display = 'flex';
+            }
+        };
+
+        window.closeModalDetail = () => { document.getElementById('modal-detail').style.display = 'none'; };
+
+        // Helper to generate a single professional label card matching reference image_b87bda.jpg
+        function createCardHtml(aset) {
+            return `
+                <div style="width: 360px; height: 165px; background: #ffffff; border: 2px solid #581c87; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif;">
+                    <div style="background: #581c87; color: white; font-size: 9px; font-weight: 800; text-align: center; padding: 4px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase;">
+                        KARTU INVENTARIS BARANG · PAUD JATENG
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                        <div class="qr-code-target" data-code="${aset.kode}" style="width: 62px; height: 62px; background: white; padding: 2px; border: 1px solid #cbd5e1; border-radius: 4px; display:flex; align-items:center; justify-content:center; shrink:0;"></div>
+                        <div style="font-size: 11px; color: #0f172a; line-height: 1.35; font-weight: 600; flex: 1;">
+                            <div>Kode: <strong style="color: #581c87; font-family: monospace;">${aset.kode}</strong></div>
+                            <div>Nama: <strong style="color: #0f172a;">${aset.nama}</strong></div>
+                            <div>Lokasi: <span>${aset.lokasi}</span></div>
+                            <div>Tahun: <span>2026</span> | Kondisi: <strong style="color: #15803d;">${aset.kondisi}</strong></div>
+                        </div>
+                    </div>
+                    <div style="font-size: 8px; color: #64748b; font-style: italic; text-align: center; border-top: 1px solid #f3e8ff; padding-top: 3px;">
+                        Pindai QR untuk menuju data inventaris online
+                    </div>
+                </div>
+            `;
+        }
+
+        // Download Single Item PDF Sticker matching reference layout
+        window.downloadSingleBarcodePDF = () => {
+            if (!window.currentSelectedAsset) return;
+            const aset = window.currentSelectedAsset;
+
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'fixed';
+            tempContainer.style.left = '-9999px';
+            tempContainer.innerHTML = createCardHtml(aset);
+            document.body.appendChild(tempContainer);
+
+            const qrBox = tempContainer.querySelector('.qr-code-target');
+            new QRCode(qrBox, {
+                text: aset.kode,
+                width: 60,
+                height: 60,
+                colorDark: "#581c87",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            setTimeout(() => {
+                const opt = {
+                    margin:       5,
+                    filename:     `Kartu_Inventaris_${aset.kode}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2.5, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: [100, 55], orientation: 'landscape' }
+                };
+                html2pdf().from(tempContainer).set(opt).save().then(() => {
+                    document.body.removeChild(tempContainer);
+                    showToast("PDF Kartu Aset berhasil di-download!");
+                });
+            }, 300);
+        };
+
+        // Download All Items in F4 Sheet (2 columns per row, matching reference image_b87bda.jpg)
+        window.downloadAllBarcodePDF = () => {
+            const bulkContainer = document.getElementById('bulk-print-container');
+            bulkContainer.innerHTML = '';
+            bulkContainer.style.display = 'block';
+
+            let gridHtml = `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; justify-items: center; align-content: start;">`;
+            assetsData.forEach(aset => {
+                gridHtml += createCardHtml(aset);
+            });
+            gridHtml += `</div>`;
+            bulkContainer.innerHTML = gridHtml;
+
+            const targets = bulkContainer.querySelectorAll('.qr-code-target');
+            targets.forEach(target => {
+                const codeText = target.getAttribute('data-code');
+                new QRCode(target, {
+                    text: codeText,
+                    width: 60,
+                    height: 60,
+                    colorDark: "#581c87",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            });
+
+            setTimeout(() => {
+                const opt = {
+                    margin:       10,
+                    filename:     `Semua_Kartu_Inventaris_F4.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'f4', orientation: 'portrait' }
+                };
+                html2pdf().from(bulkContainer).set(opt).save().then(() => {
+                    bulkContainer.style.display = 'none';
+                    showToast("PDF Sheet F4 Berhasil Di-download!");
+                });
+            }, 600);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-aset');
+            window.applyFilters = () => {
+                const keyword = searchInput ? searchInput.value.toLowerCase() : '';
+                const kategori = document.getElementById('filter-kategori-val').value;
+                const kondisi = document.getElementById('filter-kondisi-val').value;
+
+                const filteredData = assetsData.filter(aset => {
+                    const matchKeyword = aset.nama.toLowerCase().includes(keyword) || aset.kode.toLowerCase().includes(keyword) || aset.lokasi.toLowerCase().includes(keyword);
+                    const matchKategori = kategori === 'Semua' || aset.kategori === kategori;
+                    const matchKondisi = kondisi === 'Semua' || aset.kondisi === kondisi;
+                    return matchKeyword && matchKategori && matchKondisi;
+                });
+                renderGroupedAssets(filteredData);
+            };
+
+            if(searchInput) searchInput.addEventListener('input', window.applyFilters);
+            refreshAllUI();
+            syncFromSupabase(false);
+        });
+    </script>
+</body>
+</html>
